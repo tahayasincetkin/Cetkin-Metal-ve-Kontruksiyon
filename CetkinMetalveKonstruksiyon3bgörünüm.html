@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3B Model İnceleme - Çetkin Metal</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background-color: #0f1115;
+            background-image: radial-gradient(circle at 50% 50%, #1a1f2c 0%, #0f1115 100%);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        /* Geri Dön Butonu */
+        .back-button {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+        .back-button:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(-3px);
+        }
+
+        /* Başlık */
+        h1 {
+            color: #f3f4f6;
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        h1 strong {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Modeli Saran Cam Tasarım (Glassmorphism) Sahnesi */
+        .presentation-card {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Model Viewer */
+        model-viewer {
+            width: 100%;
+            height: 65vh;
+            min-height: 500px;
+            background-color: transparent; /* Modelin uzayda/boşlukta durması için şeffaf */
+            border-radius: 12px;
+            outline: none;
+        }
+
+        /* Model Bulunamazsa Çıkacak Ekran */
+        .no-model-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 17, 21, 0.9);
+            border-radius: 20px;
+            color: #9ca3af;
+            display: none; /* JS ile kontrol edilecek */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 400;
+            z-index: 10;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+        .no-model-message span {
+            font-size: 40px;
+            margin-bottom: 15px;
+            opacity: 0.7;
+        }
+
+        /* Mobil Uyum */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+            .back-button {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 20px;
+                align-self: flex-start;
+            }
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+            model-viewer {
+                height: 50vh;
+                min-height: 400px;
+            }
+            .presentation-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Geri Dön Butonu (href kısmına ana listeleme sayfanızın adını yazmalısınız) -->
+    <a href="CetkinMetalveKonstruksiyon3BModeller.html" class="back-button">← Modellere Dön</a>
+
+    <h1 id="page-title">3B Model <strong>Detay Görünümü</strong></h1>
+
+    <div class="presentation-card">
+        <model-viewer
+            id="user-viewer"
+            camera-controls
+            auto-rotate
+            rotation-per-second="30deg"
+            interaction-prompt="auto"
+            shadow-intensity="2"
+            shadow-softness="1"
+            exposure="1.1"
+            environment-image="neutral">
+        </model-viewer>
+
+        <!-- Hata Durumu Katmanı -->
+        <div id="no-model-msg" class="no-model-message">
+            <span>⚠️</span>
+            <p>Bu bağlantıya ait herhangi bir 3B model bulunamadı.<br>Model satıcı tarafından henüz yüklenmemiş veya silinmemiş olabilir.</p>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const modelId = urlParams.get('id') || 'v2_model_1';
+            const savedModel = localStorage.getItem(modelId);
+            const viewer = document.getElementById('user-viewer');
+            const noModelMsg = document.getElementById('no-model-msg');
+            const pageTitle = document.getElementById('page-title');
+
+            // Hangi modelin incelendiğini başlığa yazdır (Örn: v2_model_3 -> Model 3)
+            const modelNumber = modelId.split('_').pop();
+            pageTitle.innerHTML = `Model ${modelNumber} <strong>İncelemesi</strong>`;
+
+            if (savedModel) {
+                // Model varsa yükle
+                viewer.src = savedModel;
+                noModelMsg.style.display = 'none';
+            } else {
+                // Sadece console.log yerine kullanıcıya görsel bir uyarı ver
+                noModelMsg.style.display = 'flex';
+                console.log('Henüz yüklenmiş bir 3B model bulunmamaktadır.');
+            }
+        });
+    </script>
+</body>
+</html>
